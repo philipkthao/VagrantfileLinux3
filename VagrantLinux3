@@ -76,4 +76,4 @@ echo "</tr>" >> $WEB_DIR/report.html
 done < <(df -h | grep -vi filesystem)
 echo "" >> $WEB_DIR/report.html
 
-## big test......are younusing Brackets?
+## big test......are you using Brackets?
