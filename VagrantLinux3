@@ -1,18 +1,77 @@
-Vagrant.configure("2") do |config|
-   config.vm.define "box1" do |box1|
-         
-         box1.vm.box="ubuntu/trusty64"
-         
-         box1.vm.network :forwarded_port, guest: 22, host: 10122, id: "ssh"
-        
-end
+#!/bin/bash
+while [ true ] ;do
+used=`free -m |awk 'NR==3 {print $4}'`
+if [ $used -lt 1500 ] && [ $used -gt 800 ]; then
+echo "Free memory is below 1500MB. Possible memory leak!!!"
 
-  config.vm.define "box2" do |box2|
-        
-        box2.vm.network="scotch/box"
-        
-        box.vm.network :forward_port, guest: 22, host: 10222, id: "ssh"
-  end
-end  
-        
-       
+fi
+sleep 5
+done
+
+Next script will display your system information.
+#!/bin/bash
+# Sample script written for Part 4 of the RHCE series
+# This script will return the following set of system information:
+# -Hostname information:
+echo -e "\e[31;43m***** HOSTNAME INFORMATION *****\e[0m"
+hostnamectl
+echo ""
+# -File system disk space usage:
+echo -e "\e[31;43m***** FILE SYSTEM DISK SPACE USAGE *****\e[0m"
+df -h
+echo ""
+# -Free and used memory in the system:
+echo -e "\e[31;43m ***** FREE AND USED MEMORY *****\e[0m"
+free
+echo ""
+# -System uptime and load:
+echo -e "\e[31;43m***** SYSTEM UPTIME AND LOAD *****\e[0m"
+uptime
+echo ""
+# -Logged-in users:
+echo -e "\e[31;43m***** CURRENTLY LOGGED-IN USERS *****\e[0m"
+who
+echo ""
+# -Top 5 processes as far as memory usage is concerned
+echo -e "\e[31;43m***** TOP 5 MEMORY-CONSUMING PROCESSES *****\e[0m"
+ps -eo %mem,%cpu,comm --sort=-%mem | head -n 6
+echo ""
+echo -e "\e[1;32mDone.\e[0m"
+
+Next script will run the well-known df -h command, format the output into a HTML table and save it in the report.html file. When you run this script, you will get an error message that no directory exists for storing report.html file. Fix this error by specifying a different path inside your script (you can choose the same path where all of your scripts are stored).
+#!/bin/bash
+# Sample script to demonstrate the creation of an HTML report using shell scripting
+# Web directory
+WEB_DIR=/var/www/html
+# A little CSS and table layout to make the report look a little nicer
+echo "
+
+
+equiv='Content-Type' content='text/html; charset=UTF-8' />
+
+" > $WEB_DIR/report.html
+# View hostname and insert it at the top of the html body
+HOST=$(hostname)
+echo "Filesystem usage for host $HOST<br>
+Last updated: $(date)<br><br>
+
+
+
+<tr><th class='titulo'>Filesystem
+<th class='titulo'>Size
+<th class='titulo'>Use %
+</tr>" >> $WEB_DIR/report.html
+
+
+# Read the output of df -h line by line
+
+while read line; do
+echo "<tr><td align='center'>" >> $WEB_DIR/report.html
+echo $line | awk '{print $1}' >> $WEB_DIR/report.html
+echo "<td align='center'>" >> $WEB_DIR/report.html
+echo $line | awk '{print $2}' >> $WEB_DIR/report.html
+echo "<td align='center'>" >> $WEB_DIR/report.html
+echo $line | awk '{print $5}' >> $WEB_DIR/report.html
+echo "</tr>" >> $WEB_DIR/report.html
+done < <(df -h | grep -vi filesystem)
+echo "" >> $WEB_DIR/report.html
